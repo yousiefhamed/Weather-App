@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        min-height: 100vh;
+        max-width: 100vw;
+        position: relative;
+        font-family: sans-serif;
+      }
+      div.background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: -1;
+
+        img {
+          width: 100%;
+          min-width: 100vw;
+          min-height: 100vh;
+          min-width: 100vw;
+          min-height: 100vh;
+        }
+      }
+      .container {
+        backdrop-filter: blur(10px);
+        padding: 50px;
+        border-radius: 50px;
+        box-shadow: 0px 0px 10px -5px;
+
+        h1 {
+          margin-bottom: 50px;
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+          width: 400px;
+
+          label {
+            margin-bottom: 10px;
+            font-weight: 500;
+          }
+
+          input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+
+            &:focus {
+              outline: none;
+            }
+          }
+
+          div#city {
+            max-height: 200px;
+            max-width: 100%;
+            overflow-y: auto;
+            background: #6eb2b96b;
+            border-radius: 10px;
+            scrollbar-width: thin;
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            padding: 0 10px;
+
+            p {
+              width: 100%;
+              padding: 2.5px 0;
+              margin: 2.5px 0;
+              border-bottom: 1px solid #dfdfdf;
+              cursor: pointer;
+            }
+          }
+
+          button {
+            width: 50%;
+            padding: 10px;
+            border: none;
+            border-radius: 50px;
+            background-color: gold;
+            margin: 30px auto 0;
+            font-size: 1.15rem;
+            font-weight: 900;
+            box-shadow: 0 0 10px #818181;
+            cursor: pointer;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background">
+      <img src="/background" alt="background" />
+    </div>
+    <div class="container">
+      <h1>Weather Application</h1>
+
+      <form action="/" method="post">
+        <label for="city">Enter a city:</label>
+        <input
+          type="text"
+          name="city"
+          id="search"
+          placeholder="Explore your City..."
+          value=""
+        />
+        <div id="city">
+          <script>
+            let cities;
+            const search = document.querySelector("#search");
+
+            const selectCity = (name, country) => {
+              search.value = `${name}, ${country}`;
+              document.getElementById("city").innerHTML = "";
+            };
+
+            fetch("./cities", { method: "POST" })
+              .then((res) => {
+                if (!res.ok) {
+                  throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                return res.json();
+              })
+              .then((data) => {
+                cities = data;
+
+                search.addEventListener("keyup", (e) => {
+                  const cityList = cities
+                    .map(({ name, country }) => {
+                      let result;
+                      if (
+                        search.value.length >= 3 &&
+                        (country.toLowerCase().includes(search.value) ||
+                          name
+                            .toLowerCase()
+                            .includes(search.value.toLowerCase()))
+                      ) {
+                        result = `<p onclick=selectCity("${name}","${country}") value="${name}, ${country}">${name}, ${country}</p>`;
+                      }
+                      return result;
+                    })
+                    .join("");
+
+                  document.getElementById("city").innerHTML = cityList;
+                });
+              })
+              .catch((error) => console.error("Unable to fetch data:", error));
+          </script>
+        </div>
+        <button type="submit">Go</button>
+      </form>
+    </div>
+  </body>
+</html>
